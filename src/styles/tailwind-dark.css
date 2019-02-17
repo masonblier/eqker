@@ -1,0 +1,29 @@
+@tailwind preflight;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    --color-bg-primary: #090c11;
+    --color-bg-secondary: #18222b;
+    --color-bg-default: #2a3c4a;
+    --color-bg-inverse: #f5f5f5;
+
+    --color-text-primary: #9cc422;
+    --color-text-secondary: #5a6a79;
+    --color-text-default: #fff;
+    --color-text-default-soft: rgba(255, 255, 255, 0.7);
+    --color-text-inverse: #373737;
+    --color-text-inverse-soft: #6a6a6a;
+}
+
+a {
+    color: var(--color-text-primary);
+    text-decoration: underline;
+}
+a:visited; {
+    opacity: 0.95;
+}
+a:hover {
+    opacity: 0.8;
+    text-decoration: none;
+}
