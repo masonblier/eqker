@@ -1,0 +1,26 @@
+.flex-grid {
+
+}
+.flex-grid-w-md {
+  width: 100%
+}
+@media (min-width: 576px) {
+  .flex-grid-w-md {
+    width: 296px;
+  }
+}
+@media (min-width: 768px) {
+  .flex-grid-w-md {
+    width: 261px;
+  }
+}
+@media (min-width: 992px) {
+  .flex-grid-w-md {
+    width: 336px;
+  }
+}
+@media (min-width: 1200px) {
+  .flex-grid-w-md {
+    width: 405px;
+  }
+}

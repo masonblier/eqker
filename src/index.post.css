@@ -1,2 +1,3 @@
 /* base styles */
 @import './styles/tailwind-dark.css';
+@import './styles/flex-grid.css';
