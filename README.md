@@ -1,6 +1,6 @@
 eqker
 --
-typescript/react/tailwindcss/webpack cloneable empty project
+Stock ticker backtest simulator
 
 license
 --
