@@ -7,6 +7,7 @@ module.exports = {
     mode: process.env.NODE_ENV || 'development',
     entry: {
         app: ['./src/index.tsx', './src/index.post.css'],
+        worker: ['./src/worker.tsx'],
         vendor: ['react', 'react-dom']
     },
     output: {
@@ -47,6 +48,9 @@ module.exports = {
     },
     plugins: [
         new MiniCssExtractPlugin({filename: "index.css"}),
-        new HtmlWebpackPlugin({ template: path.resolve(__dirname, 'src', 'index.html') }),
+        new HtmlWebpackPlugin({
+            template: path.resolve(__dirname, 'src', 'index.html'),
+            excludeChunks: ['worker']
+        }),
     ]
 }

@@ -1,5 +1,5 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import {App} from './components/App/App';
+import {EqkerUi} from './components/Eqker/Eqker';
 
-ReactDOM.render(<App />, document.getElementById('root'));
+ReactDOM.render(<EqkerUi />, document.getElementById('root'));
