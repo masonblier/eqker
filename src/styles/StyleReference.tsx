@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {TextInput,SelectInput} from '../components/App/InputWrappers';
+import {TextInput,SelectInput} from '../components/Base/InputComponents';
 
 const SAMPLE_ARRAY = ['one','two','three'];
 
