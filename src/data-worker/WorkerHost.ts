@@ -80,7 +80,7 @@ export class WorkerHost {
   off = (action, fn) => {
     if (!this.listeners[action]) return;
     const idx = this.listeners[action].indexOf(fn);
-    if (idx <= 0) return;
+    if (idx < 0) return;
     this.listeners[action].splice(idx,1);
   }
 

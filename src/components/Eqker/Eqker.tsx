@@ -1,21 +1,25 @@
 import * as React from 'react';
 import {TextInput,SelectInput} from '../Base/InputComponents';
 const {useState,useEffect} = React;
+import * as Kernels from '../../kernels/index';
 import {TickersGrid} from './TickersGrid';
+import {KernelsGrid} from './KernelsGrid';
 
 // how to simulate buy/sell request fills
 const EXECUTION_MODES = ['Buy-High/Sell-Low','Buy/Sell Mid'];
 
 // selectable kernels to simulate
-const KERNEL_OPTIONS = ['buy-growing-sell-falling','buy-falling-sell-growing'];
+const KERNEL_OPTIONS = Object.keys(Kernels.table);
 
 // default ui state
 const DEFAULT_STATE = {
   executionMode: 'Buy-High/Sell-Low',
-  interval: '15min',
-  tickers: ['SPY'],
+  interval: 'daily',
+  tickers: ['AAPL','JPM','SPY'],
   startingCapital: 10000,
-  kernels: ['buy-one-sell-one']
+  kernels: KERNEL_OPTIONS,
+  started: false,
+  paused: false,
 };
 
 /*
@@ -40,6 +44,14 @@ export function useEqkerState() {
     (action === 'setRemove') ? setState({...state,
       [data.key]: state[data.key].filter(t => t !== data.value)}) :
 
+    // start - start simulation
+    (action === 'start') ? setState({...state, started: true, paused: false}) :
+    // pause - pause simulation
+    (action === 'pause') ? setState({...state, paused: true}) :
+
+    // reset - reset state to defaults!
+    (action === 'reset') ? setState(DEFAULT_STATE) :
+
     // no match
     console.error('unknown action', action, data)
   );
@@ -57,6 +69,7 @@ export function EqkerUi() {
       <EqkerHeader />
       <TickersGrid state={state} dispatch={dispatch}/>
       <EqkerRunForm state={state} dispatch={dispatch}/>
+      <KernelsGrid state={state} dispatch={dispatch}/>
     </div>
   );
 }
@@ -80,34 +93,44 @@ export function EqkerHeader() {
     ui to configure and start/stop simulation
 */
 export function EqkerRunForm({
-  state: {startingCapital, kernel, executionMode}, dispatch
+  state: {startingCapital, kernel, executionMode, started, paused}, dispatch
 }) {
   return (
     <div className='bg-primary shadow-md rounded-md p-4 my-4'>
+      <div className='float-right'>
+        {started ? (
+          /*paused ?
+            <span>*/
+              <button className='dark-button button-red mr-1' onClick={() => dispatch('reset')}>Reset</button>
+              /*<button className='dark-button button-green' onClick={() => dispatch('start')}>Unpause</button>
+            </span>
+          :
+          <button className='dark-button' onClick={() => dispatch('pause')}>Pause</button>*/
+        ) :
+          <button className='dark-button button-green' onClick={() => dispatch('start')}>Start</button>
+        }
+      </div>
       <div className='font-bold text-xl mb-2'>Run</div>
       <form className='max-w-xs'>
         <div className='flex flex-row my-1'>
           <span className='flex-none w-24'>Initial Capital</span>
           <TextInput className='mx-1 flex-none w-24 text-right'
-            value={startingCapital}
+            value={startingCapital} disabled={started}
             onChange={(startingCapital) => dispatch('config', {startingCapital})}/>
         </div>
         <div className='flex flex-row my-1'>
           <span className='flex-none w-24'>Execution</span>
           <SelectInput className='mx-1 flex-grow' options={EXECUTION_MODES}
-            value={executionMode}
+            value={executionMode} disabled={started}
             onChange={(executionMode) => dispatch('config', {executionMode})}/>
         </div>
         <div className='flex flex-row my-1'>
           <span className='flex-none w-24'>Add Kernel</span>
           <SelectInput className='mx-1 flex-grow' options={KERNEL_OPTIONS}
             onChange={(kernel) => dispatch('setAdd', {key:'kernels',value:kernel})}
-            value={''}/>
+            value={''} disabled={started}/>
         </div>
       </form>
-      {/*<div className='pull-right'>
-        <button className='dark-button'>Start</button>
-      </div>*/}
     </div>
   );
 }

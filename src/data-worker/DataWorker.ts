@@ -11,6 +11,17 @@ const _cache = {};
     loads a set of tickers for an interval
 */
 export async function loadData({interval,tickers}, dispatch) {
+  dispatch('LOADED_DATA', await loadOrCachedData(interval,tickers));
+}
+
+/*
+  loadOrCacheData
+    loads a set of tickers for an interval
+*/
+export async function loadOrCachedData(interval,tickers) {
+  const cacheName = `loaded_${interval}_${tickers.join(',')}.csv`;
+  if (_cache[cacheName]) return _cache[cacheName];
+
   // load data
   const dataSets = await Promise.all(
     tickers.map((ticker) => loadTickerData(interval,ticker)));
@@ -19,14 +30,15 @@ export async function loadData({interval,tickers}, dispatch) {
   const data = await reshapeData(tickers, dataSets);
 
   // return
-  dispatch('LOADED_DATA', {interval,tickers,data});
+  _cache[cacheName] = {interval,tickers,data}
+  return _cache[cacheName];
 }
 
 /*
   loadTickerData
     loads a ticker csv and calculates min/max bounds
 */
-async function loadTickerData(interval,ticker) {
+export async function loadTickerData(interval,ticker) {
   const fileName = `${ticker}_${interval}.csv`;
   if (_cache[fileName]) return _cache[fileName];
 
@@ -137,29 +149,10 @@ async function reshapeData(tickers, dataSets) {
     newMeta.earliestDatetime = newRows[newRows.length-1].datetime;
     newMeta.latestDatetime = newRows[0].datetime;
 
-    // calculate int representations of date space
-    const latestDatetimeIso = DateTime.fromISO(newMeta.latestDatetime.split(' ').join('T'));
-    newMeta.earliestDatetimeInt = getDatetimeInt(newMeta.earliestDatetime, latestDatetimeIso);
-    newMeta.latestDatetimeInt = 0;
-
-
-    // values scaled to 0.0-1.0 bounds of min/max data to precalculate for rendering
-    const newRowsWithScaledValues = newRows.map((r:any) => {
-      const datetimeInt = getDatetimeInt(r.datetime, latestDatetimeIso);
-      const datetimeDiv = ((newMeta.latestDatetimeInt - newMeta.earliestDatetimeInt) || 1);
-      const priceDiv = ((newMeta.highestPrice - newMeta.lowestPrice) || 1);
-      const volumeDiv = ((newMeta.highestVolume - newMeta.lowestVolume) || 1);
-      r.datetimeScaled = (datetimeInt - newMeta.earliestDatetimeInt) / datetimeDiv;
-      r.openScaled = (newMeta.highestPrice - r.open) / priceDiv;
-      r.closeScaled = (newMeta.highestPrice - r.close) / priceDiv;
-      r.highScaled = (newMeta.highestPrice - r.high) / priceDiv;
-      r.lowScaled = (newMeta.highestPrice - r.low) / priceDiv;
-      r.volumeScaled = (newMeta.highestVolume - r.volume) / volumeDiv;
-      return r;
-    });
+    appendScaledValuesForCharting(newMeta, newRows)
 
     newTickersTable[ticker] = {
-      rows: newRowsWithScaledValues,
+      rows: newRows,
       meta: newMeta,
     };
     return newTickersTable;
@@ -173,7 +166,41 @@ async function reshapeData(tickers, dataSets) {
   getDatetimeInt
     gets difference from latestDatetime in LUXON_PRECISION units (minutes)
 */
-function getDatetimeInt(datetime, latestDatetimeIso) {
+export function getDatetimeInt(datetime, latestDatetimeIso) {
   return DateTime.fromISO(datetime.split(' ').join('T'))
       .diff(latestDatetimeIso, LUXON_PRECISION).as(LUXON_PRECISION);
+}
+
+/*
+  appendScaledValuesForCharting
+    mutative transformation to optimize rows for chart rendering
+*/
+export function appendScaledValuesForCharting(newMeta, newRows) {
+  // calculate int representations of date space
+  const latestDatetimeIso = DateTime.fromISO(newMeta.latestDatetime.split(' ').join('T'));
+  newMeta.earliestDatetimeInt = getDatetimeInt(newMeta.earliestDatetime, latestDatetimeIso);
+  newMeta.latestDatetimeInt = 0;
+
+  // append scaled values for each row
+  newRows.forEach((r:any) => appendScaledValuesToRowForCharting(newMeta, r, latestDatetimeIso));
+}
+
+/*
+  appendScaledValuesToRowForCharting
+    adds [value]Scaled values between 0.0 and 1.0 for use with relative rendered ui
+*/
+export function appendScaledValuesToRowForCharting(newMeta, r, latestDatetimeIso) {
+  // relative datetimeInt
+  const datetimeInt = getDatetimeInt(r.datetime, latestDatetimeIso);
+  // max-min of each range for use as divisor in scaled values
+  const datetimeDiv = ((newMeta.latestDatetimeInt - newMeta.earliestDatetimeInt) || 1);
+  const priceDiv = ((newMeta.highestPrice - newMeta.lowestPrice) || 1);
+  const volumeDiv = ((newMeta.highestVolume - newMeta.lowestVolume) || 1);
+  // calculate scaled values from highest price due to svg rendering from top-left
+  r.datetimeScaled = (datetimeInt - newMeta.earliestDatetimeInt) / datetimeDiv;
+  r.openScaled = (newMeta.highestPrice - r.open) / priceDiv;
+  r.closeScaled = (newMeta.highestPrice - r.close) / priceDiv;
+  r.highScaled = (newMeta.highestPrice - r.high) / priceDiv;
+  r.lowScaled = (newMeta.highestPrice - r.low) / priceDiv;
+  r.volumeScaled = (newMeta.highestVolume - r.volume) / volumeDiv;
 }

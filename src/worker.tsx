@@ -1,4 +1,5 @@
 import * as DataWorker from './data-worker/DataWorker';
+import * as KernelWorker from './data-worker/KernelWorker';
 
 /*
   initWorker
@@ -13,6 +14,7 @@ function initWorker(self) {
   function handleMessage({action,data}, dispatch) {
     switch (action) {
       case 'LOAD_DATA': return DataWorker.loadData(data, dispatch);
+      case 'KERNEL_STREAM': return KernelWorker.processKernelStream(data, dispatch);
     }
     throw new Error('unknown worker action:'+action)
   }

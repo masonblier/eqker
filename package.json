@@ -1,6 +1,6 @@
 {
   "name": "eqker",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "dependencies": {
     "luxon": "^1.11.3",
     "npm": "^6.2.0",

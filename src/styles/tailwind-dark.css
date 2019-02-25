@@ -9,8 +9,12 @@
     --color-bg-default: #152229;
     --color-bg-inverse: #f7f0ba;
 
-    --color-bg-button: #9cc42280;
-    --color-border-button: #9cc422;
+    --color-bg-gray-button: #9c9c9c80;
+    --color-border-gray-button: #9c9c9c;
+    --color-bg-red-button: #c4302280;
+    --color-border-red-button: #c43022;
+    --color-bg-green-button: #9cc42280;
+    --color-border-green-button: #9cc422;
 
     --color-text-primary: #9cc422;
     --color-text-secondary: #077cc9;
@@ -59,10 +63,18 @@ a.close-x {
     padding-bottom: .5rem;
     border-width: 1px;
     border-radius: .25rem;
-    background-color: var(--color-bg-button);
-    border-color: var(--color-border-button);
+    background-color: var(--color-bg-gray-button);
+    border-color: var(--color-border-gray-button);
     color: var(--color-text-default);
 }
 .dark-button:hover {
     opacity: 0.8;
+}
+.dark-button.button-green {
+    background-color: var(--color-bg-green-button);
+    border-color: var(--color-border-green-button);
+}
+.dark-button.button-red {
+    background-color: var(--color-bg-red-button);
+    border-color: var(--color-border-red-button);
 }

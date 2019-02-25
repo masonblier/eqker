@@ -1,13 +1,13 @@
 import * as React from 'react';
 
 // volume chart height / height
-const VOLUME_CHART_HEIGHT = 0.1;
+const VOLUME_CHART_HEIGHT = 0.3;
 
 /*
-  TickerCandlesChart
-    candle chart view of ticker
+  TimeSeriesCandlesChart
+    stock/ticker candle chart view
 */
-export function TickerCandlesChart({
+export function TimeSeriesCandlesChart({
   interval, meta,rows, width,height
 }) {
   const candleWidth = (
@@ -18,25 +18,27 @@ export function TickerCandlesChart({
 
   return (
     <div style={{width,height}}>
-      <TickerCandlesChartSvg
+      <TimeSeriesCandlesChartSvg
         width={width} height={(1 - VOLUME_CHART_HEIGHT) * height}
         candleWidth={candleWidth}
         meta={meta} rows={rows}
       />
-      <TickerBarChartSvg
-        width={width} height={VOLUME_CHART_HEIGHT * height}
-        candleWidth={candleWidth}
-        meta={meta} rows={rows}
-      />
+      {(meta.highestVolume > 0) ?
+        <TimeSeriesBarChartSvg
+          width={width} height={VOLUME_CHART_HEIGHT * height}
+          candleWidth={candleWidth}
+          meta={meta} rows={rows}
+        />
+      : null}
     </div>
   );
 }
 
 /*
-  TickerCandlesChartSvg
+  TimeSeriesCandlesChartSvg
     svg timeseries candle chart
 */
-export function TickerCandlesChartSvg({
+export function TimeSeriesCandlesChartSvg({
   width,height, candleWidth, meta,rows
 }) {
   return (
@@ -66,10 +68,10 @@ export function TickerCandlesChartSvg({
 }
 
 /*
-  TickerBarChartSvg
+  TimeSeriesBarChartSvg
     svg timeseries bar chart
 */
-export function TickerBarChartSvg({
+export function TimeSeriesBarChartSvg({
   width,height, candleWidth, meta,rows
 }) {
   return (
@@ -89,4 +91,25 @@ export function TickerBarChartSvg({
       ))}
     </svg>
   )
+}
+
+export function TimeSeriesInfo({meta,rows}) {
+  return (
+    <div className='flex-none text-xs mt-2'>
+      <div className='flex flex-row'>
+        <span className='mr-1 text-default-soft'>First</span>
+        <span>{rows[rows.length-1].open.toFixed(2)}</span>
+        <span className='flex-grow'></span>
+        <span className='mr-1 text-default-soft'>Last</span>
+        <span>{rows[0].close.toFixed(2)}</span>
+      </div>
+      <div className='flex flex-row'>
+        <span className='mr-1 text-default-soft'>High</span>
+        <span>{meta.highestPrice.toFixed(2)}</span>
+        <span className='flex-grow'></span>
+        <span className='mr-1 text-default-soft'>Low</span>
+        <span>{meta.lowestPrice.toFixed(2)}</span>
+      </div>
+    </div>
+  );
 }
