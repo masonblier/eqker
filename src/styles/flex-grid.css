@@ -1,5 +1,6 @@
+/* flex grid helpers */
 .flex-grid {
-
+  display: flex;
 }
 .flex-grid-w-md {
   width: 100%

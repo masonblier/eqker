@@ -2,11 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+/* dark color scheme */
 :root {
     --color-bg-primary: #0a2e4e;
     --color-bg-secondary: #192b3c;
     --color-bg-default: #152229;
     --color-bg-inverse: #f7f0ba;
+
+    --color-bg-button: #9cc42280;
+    --color-border-button: #9cc422;
 
     --color-text-primary: #9cc422;
     --color-text-secondary: #077cc9;
@@ -19,6 +23,7 @@
     --color-link-inverse: #3c7412;
 }
 
+/* link colors */
 a {
     color: var(--color-link-primary);
     text-decoration: underline;
@@ -44,4 +49,20 @@ a:hover,a:visited {
 a.close-x {
     text-decoration: none;
     color: var(--color-text-default-soft);
+}
+
+/* button */
+.dark-button {
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-top: .5rem;
+    padding-bottom: .5rem;
+    border-width: 1px;
+    border-radius: .25rem;
+    background-color: var(--color-bg-button);
+    border-color: var(--color-border-button);
+    color: var(--color-text-default);
+}
+.dark-button:hover {
+    opacity: 0.8;
 }

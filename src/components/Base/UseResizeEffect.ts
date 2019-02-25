@@ -1,5 +1,9 @@
 import {useState,useRef,useEffect,useLayoutEffect} from 'react';
 
+/*
+  useResizeEffect
+    gets size of element on render and refreshes on window resize
+*/
 export function useResizeEffect(onResize) {
   const outerRef = useRef(null);
   const resizeListener = () => {

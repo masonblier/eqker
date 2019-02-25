@@ -3,6 +3,10 @@ import {TextInput,SelectInput} from '../components/Base/InputComponents';
 
 const SAMPLE_ARRAY = ['one','two','three'];
 
+/*
+  StyleReference
+    view of various style / component elements used in the app
+*/
 export function StyleReference() {
   return (
     <div className=''>

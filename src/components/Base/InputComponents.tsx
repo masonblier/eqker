@@ -6,12 +6,6 @@ export interface TextInputProps {
   onChange(value: string): void;
 }
 
-export function TextInput({value,onChange,className}: TextInputProps) {
-  return (
-    <input type='text' className={className} value={value||''} onChange={(evt) => onChange(evt.target.value)}/>
-  );
-}
-
 export interface SelectInputProps {
   options: string[];
   value?: string;
@@ -19,6 +13,20 @@ export interface SelectInputProps {
   onChange(value: string): void;
 }
 
+/*
+  TextInput
+    wraps input type='text'
+*/
+export function TextInput({value,onChange,className}: TextInputProps) {
+  return (
+    <input type='text' className={className} value={value||''} onChange={(evt) => onChange(evt.target.value)}/>
+  );
+}
+
+/*
+  SelectInput
+    wraps select input
+*/
 export function SelectInput({options,value,onChange,className}: SelectInputProps) {
   return (
     <select className={className} value={value||''}

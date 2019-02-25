@@ -1,55 +1,69 @@
 import * as React from 'react';
-import {SelectInput} from '../Base/InputComponents';
+import {TextInput,SelectInput} from '../Base/InputComponents';
 const {useState,useEffect} = React;
-import {TickerCandlesChart} from './TickerCharts';
+import {TickersGrid} from './TickersGrid';
 
-const TICKERS = [
- 'AAPL','AMT','AMZN','BAC','BK','DFS','GLD','JPM','MSFT','MU','PPLT','QQQ',
- 'SBUX','SLV','SPY','TRV','TSLA','TZA','UGA','V','VIX','VOO','VXXB','XLP'
-];
-const TIME_SCALES = ['1min','15min','daily'];
+// how to simulate buy/sell request fills
 const EXECUTION_MODES = ['Buy-High/Sell-Low','Buy/Sell Mid'];
 
+// selectable kernels to simulate
+const KERNEL_OPTIONS = ['buy-growing-sell-falling','buy-falling-sell-growing'];
+
+// default ui state
 const DEFAULT_STATE = {
-  interval: '15min',
   executionMode: 'Buy-High/Sell-Low',
-  tickers: ['SPY']
+  interval: '15min',
+  tickers: ['SPY'],
+  startingCapital: 10000,
+  kernels: ['buy-one-sell-one']
 };
 
+/*
+  useEqkerState
+    state wrapper/reducer for ui actions
+*/
 export function useEqkerState() {
   const [state, setState] = useState(DEFAULT_STATE);
   const dispatch = (action, data) => (
+    // config - merges data props onto state for changing config
     (action === 'config') ? setState({...state, ...data}) :
-    (action === 'addTicker') ? setState({...state,
-      tickers: (
-        (state.tickers.indexOf(data) === -1) ?
-          state.tickers.concat([data])
-        : state.tickers
+
+    // setAdd - adds value to unique set state[key]
+    (action === 'setAdd') ? setState({...state,
+      [data.key]: (
+        (state[data.key].indexOf(data.value) === -1) ?
+          state[data.key].concat([data.value])
+        : state[data.key]
       )}) :
-    (action === 'removeTicker') ? setState({...state,
-      tickers: state.tickers.filter(t => t !== data)}) :
+
+    // setRemove - remove value from set
+    (action === 'setRemove') ? setState({...state,
+      [data.key]: state[data.key].filter(t => t !== data.value)}) :
+
+    // no match
     console.error('unknown action', action, data)
   );
   return [state as any, dispatch];
 }
 
+/*
+  EqkerUi
+    root ui element
+*/
 export function EqkerUi() {
   const [state,dispatch] = useEqkerState();
   return (
     <div className='eqker-ui container mx-auto'>
       <EqkerHeader />
-      <EqkerConfigForm
-        state={state}
-        dispatch={dispatch}
-      />
-      <EquitiesList
-        state={state}
-        dispatch={dispatch}
-      />
+      <TickersGrid state={state} dispatch={dispatch}/>
+      <EqkerRunForm state={state} dispatch={dispatch}/>
     </div>
   );
 }
 
+/*
+  EqkerHeader
+*/
 export function EqkerHeader() {
   return (
     <div className='header m-4'>
@@ -61,62 +75,39 @@ export function EqkerHeader() {
   );
 }
 
-export function EqkerConfigForm({
-  state: {interval, executionMode}, dispatch
+/*
+  EqkerRunForm
+    ui to configure and start/stop simulation
+*/
+export function EqkerRunForm({
+  state: {startingCapital, kernel, executionMode}, dispatch
 }) {
   return (
     <div className='bg-primary shadow-md rounded-md p-4 my-4'>
-      <div className='font-bold text-xl mb-2'>Eqker Config</div>
+      <div className='font-bold text-xl mb-2'>Run</div>
       <form className='max-w-xs'>
         <div className='flex flex-row my-1'>
-          <span className='flex-none w-24'>Time Scale</span>
-          <SelectInput className='mx-1 flex-grow' options={TIME_SCALES}
-            value={interval}
-            onChange={(interval) => dispatch('config', {interval})}/>
+          <span className='flex-none w-24'>Initial Capital</span>
+          <TextInput className='mx-1 flex-none w-24 text-right'
+            value={startingCapital}
+            onChange={(startingCapital) => dispatch('config', {startingCapital})}/>
         </div>
-        {/*<div className='flex flex-row my-1'>
+        <div className='flex flex-row my-1'>
           <span className='flex-none w-24'>Execution</span>
           <SelectInput className='mx-1 flex-grow' options={EXECUTION_MODES}
             value={executionMode}
             onChange={(executionMode) => dispatch('config', {executionMode})}/>
-        </div>*/}
+        </div>
+        <div className='flex flex-row my-1'>
+          <span className='flex-none w-24'>Add Kernel</span>
+          <SelectInput className='mx-1 flex-grow' options={KERNEL_OPTIONS}
+            onChange={(kernel) => dispatch('setAdd', {key:'kernels',value:kernel})}
+            value={''}/>
+        </div>
       </form>
+      {/*<div className='pull-right'>
+        <button className='dark-button'>Start</button>
+      </div>*/}
     </div>
-  );
-}
-
-export function EquitiesList({
-  state: {interval, tickers}, dispatch
-}) {
-  return (
-    <div className='-mx-2 my-4'>
-      <EquitiesListAddForm dispatch={dispatch}/>
-      <div className='flex flex-row flex-wrap flex-grid'>
-        {tickers.map((ticker,idx) => (
-          <div className='flex-grid-w-md' key={ticker}>
-            <div className='bg-secondary shadow-md rounded-md m-2 p-4 relative'>
-              <div>{ticker}</div>
-              <a className='close-x' onClick={() => dispatch('removeTicker', ticker)}>x</a>
-              <TickerCandlesChart interval={interval} ticker={ticker} dispatch={dispatch}/>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-export function EquitiesListAddForm({
-  dispatch
-}) {
-  return (
-    <form className='max-w-xs my-2 mx-6'>
-      <div className='flex flex-row my-1'>
-        <span className='flex-none w-24'>Add Equity</span>
-        <SelectInput className='mx-1 flex-grow' options={TICKERS}
-          value={''}
-          onChange={(ticker) => dispatch('addTicker', ticker)}/>
-      </div>
-    </form>
   );
 }

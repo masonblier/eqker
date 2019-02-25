@@ -1,23 +1,37 @@
-import * as DataWorker from './lib/DataWorker';
+import * as DataWorker from './data-worker/DataWorker';
 
-(function (self) {
+/*
+  initWorker
+    iife to wrap worker `self` instance
+*/
+function initWorker(self) {
 
-function handleMessage({action,data}, dispatch) {
-  switch (action) {
-    case 'LOAD_DATA': return DataWorker.loadData(data, dispatch);
+  /*
+    handleMessage
+      routes messages to handlers by action type
+  */
+  function handleMessage({action,data}, dispatch) {
+    switch (action) {
+      case 'LOAD_DATA': return DataWorker.loadData(data, dispatch);
+    }
+    throw new Error('unknown worker action:'+action)
   }
-  throw new Error('unknown worker action:'+action)
+
+  // handles Worker message from parent window WorkerHost instance
+  self.onmessage = (evt:any) => {
+    handleMessage(evt.data, (action, data) => self.postMessage({action,data}));
+  };
+
+  // handles SharedWorker connections from parent window WorkerHost instance
+  self.onconnect = (evt:any) => {
+    var port = evt.ports[0];
+    // handles message from SharedWorker
+    port.onmessage = function(evt:any) {
+      handleMessage(evt.data, (action, data) => port.postMessage({action,data}))
+    };
+  };
+
 }
 
-self.onmessage = (evt:any) => {
-  handleMessage(evt.data, (action, data) => self.postMessage({action,data}));
-};
-
-self.onconnect = (evt:any) => {
-  var port = evt.ports[0];
-  port.onmessage = function(evt:any) {
-    handleMessage(evt.data, (action, data) => port.postMessage({action,data}))
-  };
-};
-
-})(self as any);
+// immediately invoked
+initWorker(self as any);
